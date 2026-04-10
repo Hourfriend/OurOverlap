@@ -269,6 +269,10 @@
     }
     /* Hide the colour tint too — video provides its own atmosphere */
     #panel.has-video #panel-tint { opacity: 0 !important; }
+    /* Remove dark background from the content area */
+    #panel.has-video #panel-inner {
+      background: transparent !important;
+    }
 
     /* Text needs to stay legible directly over video */
     #panel.has-video .p-panel-glyph,
