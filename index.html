@@ -311,40 +311,47 @@
     }
     #panel-close:hover { color: var(--amber); }
 
-    /* ════════════════════ ENDING ════════════════════ */
-    #ending {
-      position: fixed; inset: 0; z-index: 300;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: rgba(6,4,2,0); pointer-events: none;
-      opacity: 0; text-align: center; padding: 40px;
-      transition: opacity 1.4s ease, background 1.4s ease;
+    /* ════════════════════ ENDING INLINE ════════════════════ */
+    #ending-inline {
+      text-align: center;
+      padding: 70px 32px 100px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(24px);
+      transition: opacity 1.6s cubic-bezier(.22,1,.36,1),
+                  transform 1.6s cubic-bezier(.22,1,.36,1);
     }
-    #ending.show { opacity:1; pointer-events:all; background:rgba(6,4,2,.96); }
+    #ending-inline.show {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
 
     .end-line {
       font-family: 'Playfair Display', serif; font-weight: 400;
-      font-size: clamp(1.3rem, 3.5vw, 2.1rem); line-height: 1.65;
-      color: var(--cream); max-width: 460px;
-      opacity: 0; transform: translateY(12px);
-      transition: opacity 1.4s ease, transform 1.4s ease;
+      font-size: clamp(1.15rem, 2.8vw, 1.75rem); line-height: 1.7;
+      color: var(--cream); max-width: 440px; margin: 0 auto;
     }
-    #ending.show .end-line          { opacity:1; transform:translateY(0); }
-    #ending.show .end-line:nth-child(2) {
-      color: rgba(200,147,90,.65); font-style: italic;
-      transition-delay: .5s;
+    .end-line:nth-child(2) {
+      font-style: italic;
+      color: rgba(200,147,90,.6);
+      margin-top: 8px;
     }
+
     #btn-listen {
-      margin-top: 58px; opacity:0; transform:translateY(8px);
-      transition: opacity 1.1s ease 1.8s, transform 1.1s ease 1.8s;
+      display: inline-block;
+      margin-top: 48px;
       font-family: 'EB Garamond', serif; font-style: italic;
-      font-size: 15px; letter-spacing: .3em; color: var(--amber);
-      background: transparent; border: none;
+      font-size: 15px; letter-spacing: .3em;
+      color: var(--amber); background: transparent; border: none;
       border-bottom: 1px solid rgba(200,147,90,.22);
       padding: 6px 4px; cursor: pointer;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 1.1s ease 0.5s, transform 1.1s ease 0.5s,
+                  color .3s, border-color .3s;
     }
-    #ending.show #btn-listen { opacity:1; transform:translateY(0); }
-    #btn-listen:hover { color:var(--amber-light); border-color:rgba(200,147,90,.55); }
+    #ending-inline.show #btn-listen { opacity: 1; transform: translateY(0); }
+    #btn-listen:hover { color: var(--amber-light); border-color: rgba(200,147,90,.55); }
 
     /* ════════════════════ LISTEN SCENE ════════════════════ */
     #scene-listen {
@@ -463,6 +470,10 @@
     }
     .mob-row:hover, .mob-row.visited { background:rgba(200,147,90,.03); }
     .mob-glyph { font-size:18px; color:rgba(200,147,90,.38); flex-shrink:0; }
+    .mob-row[data-id="snowboarding"] .mob-glyph {
+      color: rgba(200,147,90,.75);
+      font-style: normal;
+    }
     .mob-name {
       font-family:'EB Garamond',serif; font-style:italic;
       font-size:16px; color:var(--cream-dim); transition:color .3s;
@@ -616,6 +627,13 @@
 
   <div id="mob-list"></div>
   <div id="leaf-row"></div>
+
+  <!-- Fades in below the map once all nodes visited -->
+  <div id="ending-inline">
+    <p class="end-line">I believe this is a once-in-a-lifetime connection.</p>
+    <p class="end-line">That's all.</p>
+    <button id="btn-listen">Please listen</button>
+  </div>
 </section>
 
 <!-- ══════════ PANEL ══════════ -->
@@ -639,13 +657,6 @@
     <p id="panel-text"></p>
     <button id="panel-close">close</button>
   </div>
-</div>
-
-<!-- ══════════ ENDING ══════════ -->
-<div id="ending">
-  <p class="end-line">I believe this is a once-in-a-lifetime connection.</p>
-  <p class="end-line">That's all.</p>
-  <button id="btn-listen">please listen</button>
 </div>
 
 <!-- ══════════ LISTEN ══════════ -->
@@ -738,7 +749,7 @@ const NODES = [
 
   // ── Outer ring — r factor 0.44, start 300°, step ≈51.43°
   {
-    id:'snowboarding', label:'Snowboarding', glyph:'❄', ring:1, angle:300,
+    id:'snowboarding', label:'Snowboarding', glyph:'❄︎', ring:1, angle:300,
     inkRgb:'165,195,215',
     tint:'rgba(162,192,215,.045)',
     videoSrc: null,   // ← replace: 'snowboarding.mp4'
@@ -777,7 +788,7 @@ const NODES = [
     inkRgb:'200,155,90',
     tint:'rgba(200,152,88,.052)',
     videoSrc: null,   // ← replace: 'family.mp4'
-    text:`I've always known, deep down, that I wanted children.\n\nTo me, building a family is one of the most meaningful\nand profound experiences life can offer.\nIt's something I've carried seriously in my heart for a long time.\n\nWith you, I felt I had finally found a woman\nI could truly picture sharing that life with —\nbuilding a future, raising a family, and growing old beside.\n\nIt also meant a lot to me that we shared similar values\naround health and personal choice.`
+    text:`I've always known, deep down, that I wanted children.\n\nTo me, building a family is one of the most meaningful\nand profound experiences life can offer.\nIt's something I've carried seriously in my heart for a long time.\n\nWith you, I felt I had finally found a woman\nI could truly picture sharing that life with —\nbuilding a future, raising a family, and growing old beside.\n\nIt also meant a lot to me that we shared similar values\naround health and personal choice, including that we both\nchose to remain unvaccinated for Covid.`
   },
   {
     id:'shambhala', label:'Shambhala', glyph:'♪', ring:1, angle:248.6,
@@ -1100,19 +1111,21 @@ document.getElementById('panel-veil').addEventListener('click', closePanel);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
 // ════════════════════════════════════════════════════════
-// ENDING
+// ENDING — inline reveal below the map
 // ════════════════════════════════════════════════════════
 function triggerEnding() {
   closePanel();
-  setTimeout(() => document.getElementById('ending').classList.add('show'), 300);
+  setTimeout(() => {
+    const el = document.getElementById('ending-inline');
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 500);
 }
 
 document.getElementById('btn-listen').addEventListener('click', () => {
-  document.getElementById('ending').classList.remove('show');
-  // Stop ambient track gracefully
+  // Stop ambient track
   const amb = document.getElementById('ambient-audio');
-  amb.pause();
-  amb.currentTime = 0;
+  amb.pause(); amb.currentTime = 0;
   document.getElementById('hint-bar').classList.remove('show');
 
   setTimeout(() => {
@@ -1124,7 +1137,7 @@ document.getElementById('btn-listen').addEventListener('click', () => {
     audio.play().catch(()=>{});
     document.getElementById('btn-play').textContent = '❚❚';
     document.getElementById('wavefield').classList.remove('still');
-  }, 700);
+  }, 400);
 });
 
 document.getElementById('scene-back').addEventListener('click', () => {
