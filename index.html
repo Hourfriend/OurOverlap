@@ -405,6 +405,65 @@
     .p-btn.main    { width:52px; height:52px; font-size:16px; border-color:rgba(200,147,90,.28); color:var(--amber); }
     .vol-row       { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
     .vol-ico       { font-size:13px; color:rgba(200,147,90,.28); }
+
+    /* ── Timeline ── */
+    .timeline-wrap {
+      width: 100%; max-width: 340px;
+      margin: 0 auto 22px;
+    }
+    .timeline-track {
+      position: relative;
+      height: 2px;
+      background: rgba(200,147,90,.15);
+      border-radius: 2px;
+      margin-bottom: 10px;
+    }
+    .timeline-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 0%;
+      background: var(--amber);
+      border-radius: 2px;
+      transition: width .15s linear;
+      pointer-events: none;
+    }
+    .timeline-scrub {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin: 0;
+      /* expand tap area vertically */
+      top: -10px; height: calc(100% + 20px);
+    }
+    /* Visible thumb on the track */
+    .timeline-track:hover .timeline-fill,
+    .timeline-track:focus-within .timeline-fill {
+      background: var(--amber-light);
+    }
+    .timeline-dot {
+      position: absolute;
+      top: 50%; transform: translate(-50%, -50%);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--amber);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .timeline-track:hover .timeline-dot { opacity: 1; }
+
+    .timeline-times {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: rgba(200,147,90,.35);
+    }
     input[type=range].vol-range {
       -webkit-appearance:none; width:110px; height:1px;
       background:rgba(200,147,90,.18); outline:none; border-radius:1px;
@@ -685,6 +744,7 @@
       }
       .player-wrap { max-width: 100%; }
       .wavefield   { height: 42px; margin-bottom: 28px; }
+      .timeline-wrap { max-width: 100%; }
 
       /* Bigger touch targets for audio controls */
       .p-btn      { width: 52px; height: 52px; font-size: 15px; }
@@ -793,7 +853,6 @@
   <!-- Fades in below the map once all nodes visited -->
   <div id="ending-inline">
     <p class="end-line">I believe this is a once-in-a-lifetime connection.</p>
-    <p class="end-line">That's all.</p>
     <button id="btn-listen">Please listen</button>
   </div>
 </section>
@@ -825,18 +884,29 @@
 <div id="scene-listen">
   <p class="listen-head">Something to hold<br>while you sit with this.</p>
   <div class="player-wrap">
-    <p class="track-lbl" id="track-lbl">final message</p>
     <div class="wavefield still" id="wavefield"></div>
     <div class="player-ctrls">
       <button class="p-btn" id="btn-mute">♪</button>
       <button class="p-btn main" id="btn-play">▶</button>
       <button class="p-btn" id="btn-stop">■</button>
     </div>
+    <!-- Timeline -->
+    <div class="timeline-wrap">
+      <div class="timeline-track">
+        <div class="timeline-fill" id="timeline-fill"></div>
+        <input type="range" class="timeline-scrub" id="timeline-scrub"
+               min="0" max="100" step="0.1" value="0"/>
+      </div>
+      <div class="timeline-times">
+        <span id="time-current">0:00</span>
+        <span id="time-total">—</span>
+      </div>
+    </div>
     <div class="vol-row">
       <span class="vol-ico">♩</span>
       <input type="range" class="vol-range" id="vol" min="0" max="1" step="0.01" value="0.8"/>
     </div>
-    <audio id="audio" loop>
+    <audio id="audio">
       <source src="final_message.wav" type="audio/wav"/>
     </audio>
   </div>
@@ -1329,10 +1399,55 @@ function buildWaveform() {
     b.style.animationDuration = (1.0 + Math.random() * 0.75) + 's';
     wf.appendChild(b);
   }
+  // Add visible thumb dot to track
+  const dot = document.createElement('div');
+  dot.className = 'timeline-dot'; dot.id = 'timeline-dot';
+  document.querySelector('.timeline-track').appendChild(dot);
 }
 
-const audio   = document.getElementById('audio');
-const btnPlay = document.getElementById('btn-play');
+function formatTime(s) {
+  if (isNaN(s)) return '—';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+const audio    = document.getElementById('audio');
+const btnPlay  = document.getElementById('btn-play');
+const fill     = document.getElementById('timeline-fill');
+const scrub    = document.getElementById('timeline-scrub');
+const timeCur  = document.getElementById('time-current');
+const timeTotal= document.getElementById('time-total');
+
+// Update fill + times as audio plays
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  fill.style.width = pct + '%';
+  scrub.value = pct;
+  timeCur.textContent = formatTime(audio.currentTime);
+  // Move dot
+  const dot = document.getElementById('timeline-dot');
+  if (dot) dot.style.left = pct + '%';
+});
+
+// Show total duration once known
+audio.addEventListener('loadedmetadata', () => {
+  timeTotal.textContent = formatTime(audio.duration);
+});
+
+// When audio ends — pause, reset waveform, keep position at end
+audio.addEventListener('ended', () => {
+  btnPlay.textContent = '▶';
+  document.getElementById('wavefield').classList.add('still');
+});
+
+// Scrub
+scrub.addEventListener('input', () => {
+  if (!audio.duration) return;
+  audio.currentTime = (parseFloat(scrub.value) / 100) * audio.duration;
+});
+
 btnPlay.addEventListener('click', () => {
   if (audio.paused) {
     audio.play().catch(()=>{});
@@ -1351,6 +1466,11 @@ document.getElementById('btn-stop').addEventListener('click', () => {
   audio.pause(); audio.currentTime = 0;
   btnPlay.textContent = '▶';
   document.getElementById('wavefield').classList.add('still');
+  fill.style.width = '0%';
+  scrub.value = 0;
+  timeCur.textContent = '0:00';
+  const dot = document.getElementById('timeline-dot');
+  if (dot) dot.style.left = '0%';
 });
 document.getElementById('vol').addEventListener('input', e => {
   audio.volume = parseFloat(e.target.value);
