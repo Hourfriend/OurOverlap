@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Where We Overlapped</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:          #0f0c09;
+      --amber:       #c8935a;
+      --amber-light: #e0b070;
+      --amber-pale:  rgba(200,147,90,0.14);
+      --amber-glow:  rgba(200,147,90,0.32);
+      --cream:       #efe5d4;
+      --cream-dim:   rgba(239,229,212,0.52);
+      --cream-faint: rgba(239,229,212,0.22);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'EB Garamond', Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      z-index: 900; pointer-events: none;
+      opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+    }
+
+    /* ── Painterly canvas ── */
+    #paint-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ════════════════════ HERO ════════════════════ */
+    #hero {
+      position: relative; z-index: 2;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 80px 32px;
+    }
+
+    .souls-wrap {
+      position: relative; width: 160px; height: 80px;
+      margin: 0 auto 64px;
+    }
+    .soul {
+      position: absolute; top: 50%;
+      width: 72px; height: 72px; border-radius: 50%;
+      filter: blur(1px);
+    }
+    .soul-a {
+      left: 0;
+      background: radial-gradient(circle at 42% 42%, rgba(200,147,90,.72) 0%, rgba(200,147,90,.2) 45%, transparent 72%);
+      opacity: 0; animation: driftA 1.9s cubic-bezier(.34,1.2,.64,1) .5s both;
+    }
+    .soul-b {
+      right: 0;
+      background: radial-gradient(circle at 58% 42%, rgba(196,155,140,.65) 0%, rgba(196,155,140,.18) 45%, transparent 72%);
+      opacity: 0; animation: driftB 1.9s cubic-bezier(.34,1.2,.64,1) .5s both;
+    }
+    .soul-merge {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 38px; height: 72px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(232,184,122,.22) 0%, transparent 70%);
+      opacity: 0; animation: mergeGlow 1s ease 2s both;
+    }
+    @keyframes driftA {
+      0%  { opacity:0; transform:translateY(-50%) translateX(-26px); }
+      100%{ opacity:1; transform:translateY(-50%) translateX(14px); }
+    }
+    @keyframes driftB {
+      0%  { opacity:0; transform:translateY(-50%) translateX(26px); }
+      100%{ opacity:1; transform:translateY(-50%) translateX(-14px); }
+    }
+    @keyframes mergeGlow { from{opacity:0} to{opacity:1} }
+
+    .hero-eyebrow {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 14px; letter-spacing: .22em;
+      color: var(--amber); margin-bottom: 20px;
+      opacity: 0; animation: riseIn 1.2s ease 1.2s both;
+    }
+    .hero-h1 {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: clamp(2.8rem, 8vw, 6rem); line-height: 1.05;
+      color: var(--cream);
+      opacity: 0; animation: riseIn 1.5s cubic-bezier(.22,1,.36,1) 1.5s both;
+    }
+    .hero-h1 em { font-style: italic; color: var(--amber-light); display: block; }
+    .hero-sub {
+      margin-top: 36px;
+      opacity: 0; animation: riseIn 1.4s ease 2.1s both;
+    }
+    .hero-sub p {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: clamp(1.05rem, 2.3vw, 1.38rem);
+      color: var(--cream-dim); line-height: 2.2; letter-spacing: .03em;
+    }
+    .hero-arrow {
+      margin-top: 68px;
+      opacity: 0; animation: riseIn 1s ease 2.8s both;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .hero-arrow span:first-child {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 12px; letter-spacing: .2em;
+      color: rgba(200,147,90,.38);
+    }
+    .arrow-mark {
+      color: rgba(200,147,90,.28); font-size: 18px;
+      animation: breathe 2.6s ease-in-out infinite 3s;
+    }
+    @keyframes breathe {
+      0%,100%{opacity:.28; transform:translateY(0)}
+      50%    {opacity:.65; transform:translateY(4px)}
+    }
+
+    /* ════════════════════ MAP SECTION ════════════════════ */
+    #map-section {
+      position: relative; z-index: 2;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; padding: 60px 0 120px;
+    }
+
+    .map-hint {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 13px; letter-spacing: .18em;
+      color: rgba(200,147,90,.32); margin-bottom: 48px; text-align: center;
+    }
+
+    /* The map container — overflow visible so labels have space */
+    #map-wrap {
+      position: relative;
+      width:  min(820px, 92vw);
+      height: min(820px, 92vw);
+    }
+
+    /* SVG connector lines */
+    #conn-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; overflow: visible;
+      z-index: 1;
+    }
+
+    /* Center ember */
+    #ember {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px; height: 14px; border-radius: 50%;
+      background: radial-gradient(circle, var(--amber-light) 0%, var(--amber) 55%, transparent 100%);
+      box-shadow: 0 0 18px rgba(200,147,90,.65), 0 0 42px rgba(200,147,90,.28);
+      z-index: 4;
+    }
+    #ember::before, #ember::after {
+      content:''; position:absolute; border-radius:50%; border:1px solid rgba(200,147,90,.15);
+    }
+    #ember::before { inset:-10px; animation:ep 3.5s ease-in-out infinite; }
+    #ember::after  { inset:-24px; animation:ep 3.5s ease-in-out infinite 1.1s; }
+    @keyframes ep {
+      0%,100%{transform:scale(1);opacity:.5}
+      50%    {transform:scale(1.5);opacity:0}
+    }
+
+    /* Node dot ── positioned absolutely, centered on x/y via transform */
+    .p-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 5; cursor: pointer;
+      opacity: 0; animation: bloom .85s cubic-bezier(.34,1.4,.64,1) forwards;
+    }
+    .p-dot {
+      width: 50px; height: 50px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .5s cubic-bezier(.34,1.4,.64,1);
+    }
+    .p-node:hover .p-dot  { transform: scale(1.18); }
+    .p-node.open .p-dot   { transform: scale(1.22); }
+
+    .p-glyph {
+      font-size: 18px; line-height: 1;
+      color: rgba(239,229,212,.38);
+      transition: color .35s ease;
+      user-select: none; pointer-events: none;
+    }
+    .p-node:hover .p-glyph,
+    .p-node.open  .p-glyph { color: rgba(200,147,90,.92); }
+    .p-node.visited .p-glyph { color: rgba(200,147,90,.52); }
+
+    @keyframes bloom {
+      0%  { opacity:0; transform:translate(-50%,-50%) scale(.35); }
+      100%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+    }
+
+    /* Node label ── separate element, absolutely positioned in container via JS */
+    .p-label {
+      position: absolute;
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 12.5px; letter-spacing: .06em;
+      color: var(--cream-faint); white-space: nowrap;
+      pointer-events: none; user-select: none;
+      transition: color .4s ease, opacity .4s ease;
+      z-index: 6;
+      opacity: 0; animation: fadeIn .8s ease forwards;
+    }
+    .p-label.lit    { color: rgba(200,147,90,.82); }
+    .p-label.dimmed { color: rgba(200,147,90,.38); }
+
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    /* Progress leaves */
+    #leaf-row {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      max-width: 300px; margin: 44px auto 0;
+    }
+    .leaf {
+      width: 6px; height: 9px; border-radius: 50% 50% 50% 0;
+      background: rgba(239,229,212,.07); transform: rotate(-45deg);
+      transition: background .6s ease, box-shadow .6s ease;
+    }
+    .leaf.filled {
+      background: rgba(200,147,90,.42);
+      box-shadow: 0 0 6px rgba(200,147,90,.22);
+    }
+
+    /* ════════════════════ PANEL ════════════════════ */
+    #panel {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; pointer-events: none;
+      opacity: 0; transition: opacity .6s ease;
+    }
+    #panel.open { opacity: 1; pointer-events: all; }
+
+    #panel-veil {
+      position: absolute; inset: 0;
+      background: rgba(8,5,3,.9);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    }
+    #panel-tint {
+      position: absolute; inset: 0;
+      opacity: 0; pointer-events: none;
+      transition: opacity 1.4s ease, background 1.4s ease;
+    }
+    #panel.open #panel-tint { opacity: 1; }
+
+    /* Per-node blurred video background */
+    #panel-film {
+      position: absolute; inset: 0; z-index: 0;
+      overflow: hidden; display: none;
+    }
+    #panel-film video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: blur(24px) brightness(.14) sepia(.4);
+      transform: scale(1.1);
+    }
+    #panel-film.active { display: block; }
+
+    #panel-inner {
+      position: relative; z-index: 2;
+      max-width: 520px; width: 100%;
+      text-align: center;
+      transform: translateY(22px);
+      transition: transform .7s cubic-bezier(.22,1,.36,1);
+    }
+    #panel.open #panel-inner { transform: translateY(0); }
+
+    .p-panel-glyph {
+      display: block; font-size: 2.2rem;
+      margin-bottom: 26px; color: var(--amber);
+      opacity: .5; line-height: 1;
+    }
+    #panel-title {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+      color: var(--cream); letter-spacing: .03em;
+      margin-bottom: 26px; line-height: 1.1;
+    }
+    .p-rule {
+      width: 30px; height: 1px; background: var(--amber);
+      margin: 0 auto 26px; opacity: .32;
+    }
+    #panel-text {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
+      line-height: 1.95; color: rgba(239,229,212,.7);
+      white-space: pre-line;
+      max-height: 52vh; overflow-y: auto; scrollbar-width: none;
+    }
+    #panel-text::-webkit-scrollbar { display: none; }
+
+    #panel-close {
+      display: inline-block; margin-top: 42px;
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 13px; letter-spacing: .18em;
+      color: rgba(200,147,90,.32); cursor: pointer;
+      border: none; background: none; padding: 8px 16px;
+      transition: color .3s;
+    }
+    #panel-close:hover { color: var(--amber); }
+
+    /* ════════════════════ ENDING ════════════════════ */
+    #ending {
+      position: fixed; inset: 0; z-index: 300;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: rgba(6,4,2,0); pointer-events: none;
+      opacity: 0; text-align: center; padding: 40px;
+      transition: opacity 1.4s ease, background 1.4s ease;
+    }
+    #ending.show { opacity:1; pointer-events:all; background:rgba(6,4,2,.96); }
+
+    .end-line {
+      font-family: 'Playfair Display', serif; font-weight: 400;
+      font-size: clamp(1.3rem, 3.5vw, 2.1rem); line-height: 1.65;
+      color: var(--cream); max-width: 460px;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity 1.4s ease, transform 1.4s ease;
+    }
+    #ending.show .end-line          { opacity:1; transform:translateY(0); }
+    #ending.show .end-line:nth-child(2) {
+      color: rgba(200,147,90,.65); font-style: italic;
+      transition-delay: .5s;
+    }
+    #btn-listen {
+      margin-top: 58px; opacity:0; transform:translateY(8px);
+      transition: opacity 1.1s ease 1.8s, transform 1.1s ease 1.8s;
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 15px; letter-spacing: .3em; color: var(--amber);
+      background: transparent; border: none;
+      border-bottom: 1px solid rgba(200,147,90,.22);
+      padding: 6px 4px; cursor: pointer;
+    }
+    #ending.show #btn-listen { opacity:1; transform:translateY(0); }
+    #btn-listen:hover { color:var(--amber-light); border-color:rgba(200,147,90,.55); }
+
+    /* ════════════════════ LISTEN SCENE ════════════════════ */
+    #scene-listen {
+      position: fixed; inset: 0; z-index: 400;
+      background: #060402;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; padding: 40px 24px;
+      transition: opacity 1.4s ease;
+    }
+    #scene-listen.show { opacity:1; pointer-events:all; }
+
+    .listen-head {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(1.2rem, 2.8vw, 1.8rem);
+      color: rgba(239,229,212,.42); text-align:center;
+      margin-bottom: 52px; max-width: 360px; line-height: 1.65;
+    }
+    .player-wrap { width: 100%; max-width: 380px; text-align:center; }
+    .track-lbl {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 13px; letter-spacing: .12em;
+      color: rgba(200,147,90,.38); margin-bottom: 30px;
+    }
+
+    /* Organic waveform */
+    .wavefield {
+      display: flex; align-items: center; justify-content: center;
+      gap: 3px; height: 50px; margin-bottom: 32px;
+    }
+    .wstem {
+      width: 2px; border-radius: 2px;
+      background: var(--amber); opacity: .32;
+      animation: ws 1.4s ease-in-out infinite;
+      transform-origin: bottom;
+    }
+    .wavefield.still .wstem { animation:none; height:4px!important; opacity:.12; }
+
+    .player-ctrls {
+      display: flex; align-items: center; justify-content:center;
+      gap: 18px; margin-bottom: 26px;
+    }
+    .p-btn {
+      width:42px; height:42px; border-radius:50%;
+      border:1px solid rgba(200,147,90,.18);
+      background:transparent; color:rgba(239,229,212,.42);
+      font-size:13px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all .3s ease;
+    }
+    .p-btn:hover   { border-color:rgba(200,147,90,.5); color:var(--amber); }
+    .p-btn.main    { width:52px; height:52px; font-size:16px; border-color:rgba(200,147,90,.28); color:var(--amber); }
+    .vol-row       { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
+    .vol-ico       { font-size:13px; color:rgba(200,147,90,.28); }
+    input[type=range].vol-range {
+      -webkit-appearance:none; width:110px; height:1px;
+      background:rgba(200,147,90,.18); outline:none; border-radius:1px;
+    }
+    input[type=range].vol-range::-webkit-slider-thumb {
+      -webkit-appearance:none; width:11px; height:11px;
+      border-radius:50%; background:var(--amber); cursor:pointer;
+    }
+    .embed-note {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:12px; color:rgba(239,229,212,.18); line-height:1.8;
+      margin-top:18px;
+    }
+    .embed-note code {
+      font-style:normal; font-size:11px;
+      color:rgba(200,147,90,.32); background:rgba(255,255,255,.03);
+      padding:1px 5px; border-radius:2px;
+    }
+
+    #scene-back {
+      margin-top:42px; font-family:'EB Garamond',serif; font-style:italic;
+      font-size:13px; color:rgba(200,147,90,.25); letter-spacing:.18em;
+      cursor:pointer; background:none; border:none; transition:color .3s;
+    }
+    #scene-back:hover { color:var(--amber); }
+
+    /* Ambient hint bar */
+    #hint-bar {
+      position:fixed; bottom:0; left:0; right:0; z-index:50;
+      text-align:center; padding:18px;
+      background:linear-gradient(transparent,rgba(6,4,2,.9));
+      opacity:0; transition:opacity 1s ease; pointer-events:none;
+    }
+    #hint-bar.show { opacity:1; pointer-events:all; }
+    #hint-bar p {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:11px; color:rgba(200,147,90,.25); letter-spacing:.14em;
+    }
+    .hint-btns { display:flex; gap:16px; justify-content:center; margin-top:6px; }
+    .h-btn {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:11px; letter-spacing:.16em; color:rgba(200,147,90,.22);
+      background:none; border:none; cursor:pointer; transition:color .3s;
+    }
+    .h-btn:hover { color:var(--amber); }
+
+    /* ════════════════════ MOBILE LIST ════════════════════ */
+    @media (max-width:600px) {
+      #map-wrap   { display:none; }
+      #mob-list   {
+        display:flex; flex-direction:column;
+        width:100%; max-width:440px; padding:0 20px;
+        border-top:1px solid rgba(200,147,90,.07);
+      }
+    }
+    @media (min-width:601px) { #mob-list { display:none; } }
+
+    .mob-row {
+      display:flex; align-items:center; gap:18px;
+      padding:17px 0; cursor:pointer;
+      border-bottom:1px solid rgba(200,147,90,.05);
+      transition:background .3s;
+    }
+    .mob-row:hover, .mob-row.visited { background:rgba(200,147,90,.03); }
+    .mob-glyph { font-size:18px; color:rgba(200,147,90,.38); flex-shrink:0; }
+    .mob-name {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:16px; color:var(--cream-dim); transition:color .3s;
+    }
+    .mob-row:hover .mob-name { color:var(--amber-light); }
+    .mob-row.visited .mob-name { color:rgba(200,147,90,.55); }
+
+    /* Shared animation */
+    @keyframes riseIn {
+      from{opacity:0;transform:translateY(18px)}
+      to  {opacity:1;transform:translateY(0)}
+    }
+    @keyframes ws {
+      0%,100%{transform:scaleY(.28);opacity:.22}
+      50%    {transform:scaleY(1);  opacity:.72}
+    }
+    /* ════════ VINYL BACKGROUND ════════ */
+    #panel-vinyl {
+      position: absolute; inset: 0; z-index: 0;
+      display: none; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #panel-vinyl.active { display: flex; }
+
+    .vinyl-disc {
+      width: min(480px, 90vw);
+      height: min(480px, 90vw);
+      border-radius: 50%;
+      position: relative;
+      animation: vinylSpin 5s linear infinite;
+      filter: blur(9px) brightness(0.28);
+      flex-shrink: 0;
+    }
+    /* Grooves — pure CSS */
+    .vinyl-disc::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background:
+        repeating-radial-gradient(
+          circle at center,
+          rgba(10,8,6,1)     0px,
+          rgba(28,22,16,1)   2px,
+          rgba(16,12,9,1)    4px,
+          rgba(32,25,18,1)   6px,
+          rgba(10,8,6,1)     8px
+        );
+      box-shadow:
+        inset 0 0 60px rgba(0,0,0,.9),
+        0 0 80px rgba(0,0,0,.95);
+    }
+    /* Label in center */
+    .vinyl-disc::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 22%; height: 22%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(180,130,70,.7) 0%, rgba(120,85,40,.5) 60%, rgba(60,40,20,.8) 100%);
+    }
+    /* Tiny center hole */
+    .vinyl-hole {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4%; height: 4%;
+      border-radius: 50%;
+      background: rgba(8,6,4,.95);
+      z-index: 2;
+    }
+    /* Sheen highlight */
+    .vinyl-sheen {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(200,160,80,.08) 30deg,
+        rgba(200,160,80,.18) 60deg,
+        rgba(200,160,80,.06) 90deg,
+        transparent 120deg,
+        transparent 180deg,
+        rgba(180,140,60,.07) 210deg,
+        rgba(180,140,60,.14) 240deg,
+        transparent 270deg,
+        transparent 360deg
+      );
+    }
+
+    @keyframes vinylSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ════════ IMAGE BACKGROUND ════════ */
+    #panel-imgbg {
+      position: absolute; inset: 0; z-index: 0;
+      display: none; overflow: hidden;
+    }
+    #panel-imgbg.active { display: block; }
+    #panel-imgbg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: blur(3px) brightness(0.22) saturate(0.7);
+      transform: scale(1.06);
+    }
+
+    /* Ensure panel text always readable over any background */
+    #panel-inner { isolation: isolate; }
+    #panel-inner::before {
+      content: '';
+      position: absolute; inset: -60px;
+      background: radial-gradient(ellipse 70% 65% at 50% 50%,
+        rgba(6,4,3,.72) 0%, transparent 100%);
+      z-index: -1; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="paint-canvas"></canvas>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <div class="souls-wrap">
+    <div class="soul soul-a"></div>
+    <div class="soul soul-b"></div>
+    <div class="soul-merge"></div>
+  </div>
+  <p class="hero-eyebrow">an inner record</p>
+  <h1 class="hero-h1">Where We <em>Overlapped</em></h1>
+  <div class="hero-sub">
+    <p>Not everything aligns in life.</p>
+    <p>Some things just do.</p>
+  </div>
+  <div class="hero-arrow">
+    <span>touch each thread</span>
+    <span class="arrow-mark">↓</span>
+  </div>
+</section>
+
+<!-- ══════════ MAP ══════════ -->
+<section id="map-section">
+  <p class="map-hint">Each point holds something true.</p>
+
+  <div id="map-wrap">
+    <svg id="conn-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="ember"></div>
+    <!-- nodes + labels injected by JS -->
+  </div>
+
+  <div id="mob-list"></div>
+  <div id="leaf-row"></div>
+</section>
+
+<!-- ══════════ PANEL ══════════ -->
+<div id="panel">
+  <div id="panel-veil"></div>
+  <div id="panel-tint"></div>
+  <div id="panel-film">
+    <!-- Video element created dynamically per node -->
+  </div>
+  <div id="panel-vinyl">
+    <div class="vinyl-disc">
+      <div class="vinyl-sheen"></div>
+      <div class="vinyl-hole"></div>
+    </div>
+  </div>
+  <div id="panel-imgbg"><img id="panel-img" src="" alt=""/></div>
+  <div id="panel-inner">
+    <span class="p-panel-glyph" id="panel-glyph">◎</span>
+    <h2 id="panel-title">—</h2>
+    <div class="p-rule"></div>
+    <p id="panel-text"></p>
+    <button id="panel-close">close</button>
+  </div>
+</div>
+
+<!-- ══════════ ENDING ══════════ -->
+<div id="ending">
+  <p class="end-line">I believe this is a once-in-a-lifetime connection.</p>
+  <p class="end-line">That's all.</p>
+  <button id="btn-listen">Listen</button>
+</div>
+
+<!-- ══════════ LISTEN ══════════ -->
+<div id="scene-listen">
+  <p class="listen-head">Something to hold<br>while you sit with this.</p>
+  <div class="player-wrap">
+    <p class="track-lbl" id="track-lbl">add your song</p>
+    <div class="wavefield still" id="wavefield"></div>
+    <div class="player-ctrls">
+      <button class="p-btn" id="btn-mute">♪</button>
+      <button class="p-btn main" id="btn-play">▶</button>
+      <button class="p-btn" id="btn-stop">■</button>
+    </div>
+    <div class="vol-row">
+      <span class="vol-ico">♩</span>
+      <input type="range" class="vol-range" id="vol" min="0" max="1" step="0.01" value="0.8"/>
+    </div>
+    <audio id="audio" loop>
+      <source src="YOUR_SONG.mp3" type="audio/mpeg"/>
+    </audio>
+    <p class="embed-note">
+      Replace <code>YOUR_SONG.mp3</code> with your audio file<br>
+      in the same folder as this page.
+    </p>
+  </div>
+  <button id="scene-back">← return</button>
+</div>
+
+<!-- ══════════ AMBIENT BAR ══════════ -->
+<div id="hint-bar">
+  <p>ambient sound</p>
+  <div class="hint-btns">
+    <button class="h-btn" id="h-stop">stop</button>
+    <button class="h-btn" id="h-mute">mute</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// NODE DATA
+// Two rings: inner (6 nodes, 60° apart) + outer (7 nodes, ~51° apart)
+// videoSrc: set to your video filename, or leave null
+// ════════════════════════════════════════════════════════
+const NODES = [
+  // ── Inner ring — r factor 0.22, start 270°, step 60°
+  {
+    id:'depth', label:'Depth', glyph:'◎', ring:0, angle:270,
+    inkRgb:'200,162,105',
+    tint:'rgba(200,155,90,.055)',
+    videoSrc: null,
+    text:`Most people stay on the surface.\nWe didn't.\n\nWe didn't just talk about life, we questioned it.\nConversations with you actually went somewhere, and that's rare.\n\nOur first conversations — 4+ hours.\nStill could talk to you for hours about the deepest topics.`
+  },
+  {
+    id:'music', label:'Music', glyph:'♫', ring:0, angle:330,
+    inkRgb:'195,155,100',
+    tint:'rgba(195,155,100,.055)',
+    videoSrc: null,
+    vinylBg: true,
+    text:`I swear we have the exact taste in music.\nWhen I go through your liked tracks on SoundCloud —\nit's every single track, I either already like or know the artist.\n\nPlus Dope Lemon when we first hung out.\n\nI wasn't kidding when I said I wanted to marry you\nbecause you knew Dope Lemon.\nYou were already too dope,\nand that was another cherry on top for me.\n\nOur vinyl collection growing.`
+  },
+  {
+    id:'foundation', label:'Foundation', glyph:'△', ring:0, angle:30,
+    inkRgb:'155,165,200',
+    tint:'rgba(155,165,195,.045)',
+    videoSrc: null,
+    text:`It wasn't just ideas.\n\nWe were both building things in real life,\nworking towards this life we imagined.\n\nThere was a real direction there.`
+  },
+  {
+    id:'simplicity', label:'Simplicity', glyph:'∿', ring:0, angle:90,
+    inkRgb:'128,165,135',
+    tint:'rgba(128,165,130,.045)',
+    videoSrc: null,
+    text:`There was always a pull toward what's real.\n\nNature, space, philosophy, conspiracies,\nand conversations about things that aren't forced.\n\nNatural medicine.\nNatural ways to heal.\n\nThat was something we both leaned toward naturally.`
+  },
+  {
+    id:'home', label:'Home', glyph:'⌂', ring:0, angle:150,
+    inkRgb:'175,150,112',
+    tint:'rgba(175,148,108,.048)',
+    videoSrc: null,
+    text:`How we wanted to decorate our home.\nThe retro vintage style, but with new age equipment.\n\nGoing the hempcrete route\nwhen building our home from scratch.`
+  },
+  {
+    id:'mindmap', label:'Mind Map', glyph:'◇', ring:0, angle:210,
+    inkRgb:'200,155,90',
+    tint:'rgba(200,155,90,.05)',
+    videoSrc: null,
+    text:`We talked about what life could look like.\n\nNot only that — we visualized it,\nand put it on paper.\n\nNot in a fantasy way, but in a real, grounded way.\n\nIt felt very possible when we talked about it.\nIt still feels very real.`
+  },
+
+  // ── Outer ring — r factor 0.44, start 300°, step ≈51.43°
+  {
+    id:'snowboarding', label:'Snowboarding', glyph:'❄', ring:1, angle:300,
+    inkRgb:'165,195,215',
+    tint:'rgba(162,192,215,.045)',
+    videoSrc: null,   // ← replace: 'snowboarding.mp4'
+    text:`Not only do we both ride, we both shred,\nand look dope together riding.\n\nPlus I'm an instructor — freestyle —\nwhich could be handy if we had kids.\nSomething we could do as a family.`
+  },
+  {
+    id:'intimacy', label:'Intimacy', glyph:'◑', ring:1, angle:351.4,
+    inkRgb:'195,122,122',
+    tint:'rgba(195,118,118,.052)',
+    videoSrc: 'sex_video.mp4',
+    text:`There was a level of comfort that grew over time.\n\nPhysical grew. Making love started to happen.\nOur connection was continuing to get more meaningful.\n\nHearing you tell me that you loved me would turn me on.\nIt was a new type of love for me.\n\nThat kind of connection isn't something I take lightly.\nBoth being open to new experiences —\nsounded like a future of fun.`
+  },
+  {
+    id:'cats', label:'Cats', glyph:'⌾', ring:1, angle:42.8,
+    inkRgb:'188,175,148',
+    tint:'rgba(188,172,145,.045)',
+    videoSrc: null,   // ← replace: 'cats.mp4'
+    text:`We both love cats.\nWe both understand them.\n\nAnd having four of them would be amazing.\n\nI truly love Slonk and Cheddar,\nand I see a home with four cats with you.`
+  },
+  {
+    id:'psychedelics', label:'Psychedelics', glyph:'⟁', ring:1, angle:94.3,
+    inkRgb:'148,115,192',
+    tint:'rgba(145,112,188,.048)',
+    videoSrc: null,   // ← replace: 'psychedelics.mp4'
+    text:`We both have a deep relationship with psilocybin.\nWe've both done DMT, and gone to the edges.\n\nNot because we had answers,\nbut because we were both willing to look deeper.\n\nMe facilitating your DMT,\nus exploring the psychedelic realms.`
+  },
+  {
+    id:'ufos', label:'UFOs', glyph:'◉', ring:1, angle:145.7,
+    inkRgb:'112,182,172',
+    tint:'rgba(108,178,168,.042)',
+    videoSrc: null, imageSrc: 'brightstar.png',
+    text:`The frequency we operate on —\nit's like looking in a mirror.\nOur sound resonates together.\n\nWitnessing unexplainable things.\nGolden threads.`
+  },
+  {
+    id:'family', label:'Family', glyph:'✦', ring:1, angle:197.1,
+    inkRgb:'200,155,90',
+    tint:'rgba(200,152,88,.052)',
+    videoSrc: null,   // ← replace: 'family.mp4'
+    text:`I've always known, deep down, that I wanted children.\n\nTo me, building a family is one of the most meaningful\nand profound experiences life can offer.\nIt's something I've carried seriously in my heart for a long time.\n\nWith you, I felt I had finally found a woman\nI could truly picture sharing that life with —\nbuilding a future, raising a family, and growing old beside.\n\nIt also meant a lot to me that we shared similar values\naround health and personal choice.`
+  },
+  {
+    id:'shambhala', label:'Shambhala', glyph:'♪', ring:1, angle:248.6,
+    inkRgb:'210,142,92',
+    tint:'rgba(210,138,88,.048)',
+    videoSrc: 'shamb.mp4',
+    text:`We've both gone multiple years.\nWe're veterans in that world.\n\nKnowing we can go to underground dubstep shows\nand festivals together around the world.\n\nLive concerts in general —\nwhether it be an orchestra, or psych rock,\nwe love music.`
+  },
+];
+
+// ════════════════════════════════════════════════════════
+// PAINTERLY CANVAS
+// ════════════════════════════════════════════════════════
+(function() {
+  const cv  = document.getElementById('paint-canvas');
+  const ctx = cv.getContext('2d');
+  let W, H, pts = [];
+
+  function seededRng(s) {
+    return function() {
+      s = (s * 1664525 + 1013904223) & 0xffffffff;
+      return (s >>> 0) / 0xffffffff;
+    };
+  }
+
+  function drawBase() {
+    // Deep warm gradient
+    const g = ctx.createRadialGradient(W*.5,H*.44,0, W*.5,H*.44, Math.max(W,H)*.82);
+    g.addColorStop(0,   '#1a1109'); g.addColorStop(.5,'#0e0b07'); g.addColorStop(1,'#080504');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    // Amber centre pool
+    const a = ctx.createRadialGradient(W*.5,H*.47,0, W*.5,H*.47, W*.42);
+    a.addColorStop(0,'rgba(195,120,52,.08)'); a.addColorStop(1,'transparent');
+    ctx.fillStyle = a; ctx.fillRect(0,0,W,H);
+    // Dusty rose top-left
+    const r = ctx.createRadialGradient(W*.08,H*.14,0, W*.08,H*.14, W*.48);
+    r.addColorStop(0,'rgba(178,128,108,.042)'); r.addColorStop(1,'transparent');
+    ctx.fillStyle = r; ctx.fillRect(0,0,W,H);
+    // Sage bottom-right
+    const s2 = ctx.createRadialGradient(W*.88,H*.86,0, W*.88,H*.86, W*.44);
+    s2.addColorStop(0,'rgba(105,132,108,.035)'); s2.addColorStop(1,'transparent');
+    ctx.fillStyle = s2; ctx.fillRect(0,0,W,H);
+    // Vignette
+    const v = ctx.createRadialGradient(W*.5,H*.5,W*.18, W*.5,H*.5, W*.85);
+    v.addColorStop(0,'transparent'); v.addColorStop(1,'rgba(3,2,1,.78)');
+    ctx.fillStyle = v; ctx.fillRect(0,0,W,H);
+    // Static dust
+    const rng = seededRng(77);
+    for (let i = 0; i < 160; i++) {
+      const x = rng()*W, y = rng()*H, r2 = rng()*.95+.12;
+      const op = rng()*.16+.02;
+      ctx.beginPath(); ctx.arc(x,y,r2,0,Math.PI*2);
+      ctx.fillStyle = rng()>.5 ? `rgba(215,188,148,${op})` : `rgba(185,205,198,${op.toFixed(3)})`;
+      ctx.fill();
+    }
+  }
+
+  function buildPts() {
+    pts = [];
+    for (let i=0;i<20;i++) pts.push({
+      x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*1.1+.18,
+      op:Math.random()*.1+.02,
+      vx:(Math.random()-.5)*.1,
+      vy:-Math.random()*.09-.02,
+      ph:Math.random()*Math.PI*2,
+      sp:Math.random()*.007+.003
+    });
+  }
+
+  function resize() {
+    W = cv.width = window.innerWidth;
+    H = cv.height= window.innerHeight;
+  }
+
+  function frame() {
+    ctx.clearRect(0,0,W,H); drawBase();
+    pts.forEach(p => {
+      p.ph+=p.sp; p.x+=p.vx+Math.sin(p.ph)*.07; p.y+=p.vy;
+      if(p.y<-4){p.y=H+4; p.x=Math.random()*W;}
+      const op = p.op*(0.5+0.5*Math.sin(p.ph));
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(218,185,145,${op.toFixed(3)})`; ctx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+
+  resize(); buildPts(); frame();
+  window.addEventListener('resize', ()=>{ resize(); buildPts(); });
+})();
+
+// ════════════════════════════════════════════════════════
+// BUILD DESKTOP MAP
+// Two concentric rings. Labels placed as SEPARATE elements,
+// anchored radially outward from the node center.
+// ════════════════════════════════════════════════════════
+const visited = new Set();
+let mapReady  = false;
+
+function buildDesktopMap() {
+  if (mapReady) return;
+  mapReady = true;
+
+  const wrap = document.getElementById('map-wrap');
+  const svg  = document.getElementById('conn-svg');
+  const SIZE = wrap.offsetWidth;
+  const CX   = SIZE / 2;
+  const CY   = SIZE / 2;
+
+  const R = {
+    0: SIZE * 0.220,   // inner ring
+    1: SIZE * 0.440    // outer ring
+  };
+
+  // Build leaf row
+  const leafRow = document.getElementById('leaf-row');
+  NODES.forEach(n => {
+    const l = document.createElement('div');
+    l.className = 'leaf'; l.id = `leaf-${n.id}`;
+    leafRow.appendChild(l);
+  });
+
+  NODES.forEach((n, i) => {
+    const rad = n.angle * Math.PI / 180;
+    const nx  = CX + Math.cos(rad) * R[n.ring];
+    const ny  = CY + Math.sin(rad) * R[n.ring];
+
+    // ── SVG connector: curved dashed line center → node
+    // Control point is offset perpendicularly for an organic feel
+    const perpRad = rad + Math.PI / 2;
+    const cpDist  = R[n.ring] * 0.28;
+    const cpx = CX + Math.cos(rad) * R[n.ring] * 0.52 + Math.cos(perpRad) * cpDist * 0.3;
+    const cpy = CY + Math.sin(rad) * R[n.ring] * 0.52 + Math.sin(perpRad) * cpDist * 0.3;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M ${CX} ${CY} Q ${cpx} ${cpy} ${nx} ${ny}`);
+    path.setAttribute('stroke', 'rgba(200,147,90,0.08)');
+    path.setAttribute('stroke-width', '0.8');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-dasharray', '2 5');
+    svg.appendChild(path);
+
+    // ── Node dot
+    const dot = document.createElement('div');
+    dot.className = 'p-node';
+    dot.dataset.id = n.id;
+    dot.style.left = `${nx}px`;
+    dot.style.top  = `${ny}px`;
+    dot.style.animationDelay = `${0.14 + i * 0.065}s`;
+
+    // Unique warm ink wash per node
+    dot.innerHTML = `<div class="p-dot" style="
+      background: radial-gradient(circle at 40% 38%,
+        rgba(${n.inkRgb},.58) 0%,
+        rgba(${n.inkRgb},.14) 52%,
+        transparent 78%);
+      box-shadow: 0 0 0 1px rgba(${n.inkRgb},.2), 0 0 22px rgba(${n.inkRgb},.07);
+    "><span class="p-glyph">${n.glyph}</span></div>`;
+
+    dot.addEventListener('click', () => openNode(n));
+    wrap.appendChild(dot);
+
+    // ── Label: separate element, outward-projected from node center
+    const LABEL_GAP = n.ring === 0 ? 34 : 36; // px from node center to label anchor
+
+    const lx = nx + Math.cos(rad) * LABEL_GAP;
+    const ly = ny + Math.sin(rad) * LABEL_GAP;
+
+    const label = document.createElement('div');
+    label.className = 'p-label';
+    label.dataset.id = n.id;
+    label.textContent = n.label;
+    label.style.left = `${lx}px`;
+    label.style.top  = `${ly}px`;
+    label.style.animationDelay = `${0.3 + i * 0.065}s`;
+
+    // Compute text alignment from quadrant
+    const cosA = Math.cos(rad);
+    const sinA = Math.sin(rad);
+    if (Math.abs(cosA) >= Math.abs(sinA) * 0.8) {
+      if (cosA >= 0) {
+        // Right half: anchor is left edge of text
+        label.style.transform = 'translateY(-50%)';
+        label.style.textAlign = 'left';
+      } else {
+        // Left half: anchor is right edge of text
+        label.style.transform = 'translate(-100%, -50%)';
+        label.style.textAlign = 'right';
+      }
+    } else {
+      if (sinA >= 0) {
+        // Bottom: center-top of text
+        label.style.transform = 'translateX(-50%)';
+        label.style.textAlign = 'center';
+      } else {
+        // Top: center-bottom of text
+        label.style.transform = 'translate(-50%, -100%)';
+        label.style.textAlign = 'center';
+      }
+    }
+
+    wrap.appendChild(label);
+
+    // Sync hover: node ↔ label
+    dot.addEventListener('mouseenter', () => label.classList.add('lit'));
+    dot.addEventListener('mouseleave', () => {
+      if (!dot.classList.contains('open')) label.classList.remove('lit');
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// MOBILE LIST
+// ════════════════════════════════════════════════════════
+function buildMobileList() {
+  const wrap    = document.getElementById('mob-list');
+  const leafRow = document.getElementById('leaf-row');
+  NODES.forEach(n => {
+    const row = document.createElement('div');
+    row.className = 'mob-row'; row.dataset.id = n.id;
+    row.innerHTML = `<span class="mob-glyph">${n.glyph}</span><span class="mob-name">${n.label}</span>`;
+    row.addEventListener('click', () => openNode(n));
+    wrap.appendChild(row);
+
+    const l = document.createElement('div');
+    l.className = 'leaf'; l.id = `leaf-${n.id}`;
+    leafRow.appendChild(l);
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// PANEL — open / close
+// ════════════════════════════════════════════════════════
+const panel    = document.getElementById('panel');
+const filmWrap = document.getElementById('panel-film');
+
+function openNode(n) {
+  document.getElementById('panel-glyph').textContent = n.glyph;
+  document.getElementById('panel-title').textContent = n.label;
+  document.getElementById('panel-text').textContent  = n.text;
+
+  // Ink tint
+  document.getElementById('panel-tint').style.background =
+    `radial-gradient(ellipse 72% 55% at 50% 50%, ${n.tint} 0%, transparent 80%)`;
+
+  // Video background
+  filmWrap.innerHTML = '';
+  filmWrap.classList.remove('active');
+  document.getElementById('panel-vinyl').classList.remove('active');
+  document.getElementById('panel-imgbg').classList.remove('active');
+
+  if (n.videoSrc) {
+    filmWrap.classList.add('active');
+    const vid = document.createElement('video');
+    vid.src = n.videoSrc;
+    vid.autoplay = true; vid.muted = true;
+    vid.loop = true; vid.playsInline = true;
+    filmWrap.appendChild(vid);
+    vid.play().catch(()=>{});
+  } else if (n.vinylBg) {
+    document.getElementById('panel-vinyl').classList.add('active');
+  } else if (n.imageSrc) {
+    document.getElementById('panel-img').src = n.imageSrc;
+    document.getElementById('panel-imgbg').classList.add('active');
+  }
+
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Mark visited
+  visited.add(n.id);
+  const leaf = document.getElementById(`leaf-${n.id}`);
+  if (leaf) leaf.classList.add('filled');
+
+  // Update node UI
+  document.querySelectorAll(`[data-id="${n.id}"]`).forEach(el => {
+    el.classList.add('visited');
+    if (el.classList.contains('p-node')) el.classList.add('open');
+    if (el.classList.contains('p-label')) el.classList.add('dimmed');
+  });
+
+  if (visited.size === NODES.length) setTimeout(triggerEnding, 600);
+}
+
+function closePanel() {
+  panel.classList.remove('open');
+  document.body.style.overflow = '';
+  // Stop / clear all backgrounds
+  filmWrap.querySelectorAll('video').forEach(v => { v.pause(); v.src = ''; });
+  filmWrap.classList.remove('active');
+  document.getElementById('panel-vinyl').classList.remove('active');
+  document.getElementById('panel-imgbg').classList.remove('active');
+  // Remove open state from nodes
+  document.querySelectorAll('.p-node.open').forEach(el => {
+    el.classList.remove('open');
+    const lbl = document.querySelector(`.p-label[data-id="${el.dataset.id}"]`);
+    if (lbl) lbl.classList.remove('lit');
+  });
+}
+
+document.getElementById('panel-close').addEventListener('click', closePanel);
+document.getElementById('panel-veil').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// ════════════════════════════════════════════════════════
+// ENDING
+// ════════════════════════════════════════════════════════
+function triggerEnding() {
+  closePanel();
+  setTimeout(() => document.getElementById('ending').classList.add('show'), 300);
+}
+
+document.getElementById('btn-listen').addEventListener('click', () => {
+  document.getElementById('ending').classList.remove('show');
+  setTimeout(() => {
+    document.getElementById('scene-listen').classList.add('show');
+    buildWaveform();
+  }, 700);
+});
+
+document.getElementById('scene-back').addEventListener('click', () => {
+  document.getElementById('scene-listen').classList.remove('show');
+});
+
+// ════════════════════════════════════════════════════════
+// AUDIO PLAYER
+// ════════════════════════════════════════════════════════
+let waveBuilt = false;
+function buildWaveform() {
+  if (waveBuilt) return; waveBuilt = true;
+  const wf = document.getElementById('wavefield');
+  for (let i = 0; i < 40; i++) {
+    const b = document.createElement('div'); b.className = 'wstem';
+    b.style.height = (6 + Math.random() * 38) + 'px';
+    b.style.animationDelay    = (i * 0.044) + 's';
+    b.style.animationDuration = (1.0 + Math.random() * 0.75) + 's';
+    wf.appendChild(b);
+  }
+}
+
+const audio = document.getElementById('audio');
+const btnPlay = document.getElementById('btn-play');
+btnPlay.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play().catch(()=>{});
+    btnPlay.textContent = '❚❚';
+    document.getElementById('wavefield').classList.remove('still');
+  } else {
+    audio.pause(); btnPlay.textContent = '▶';
+    document.getElementById('wavefield').classList.add('still');
+  }
+});
+document.getElementById('btn-mute').addEventListener('click', function() {
+  audio.muted = !audio.muted;
+  this.style.color = audio.muted ? 'rgba(200,147,90,.22)' : '';
+});
+document.getElementById('btn-stop').addEventListener('click', () => {
+  audio.pause(); audio.currentTime = 0;
+  btnPlay.textContent = '▶';
+  document.getElementById('wavefield').classList.add('still');
+});
+document.getElementById('vol').addEventListener('input', e => {
+  audio.volume = parseFloat(e.target.value);
+});
+
+// ════════════════════════════════════════════════════════
+// AMBIENT HINT BAR
+// ════════════════════════════════════════════════════════
+setTimeout(() => document.getElementById('hint-bar').classList.add('show'), 3400);
+document.getElementById('h-stop').addEventListener('click', () =>
+  document.getElementById('hint-bar').classList.remove('show'));
+document.getElementById('h-mute').addEventListener('click', function() {
+  this.textContent = this.textContent === 'mute' ? 'unmute' : 'mute';
+});
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (window.innerWidth > 600) buildDesktopMap();
+  else buildMobileList();
+});
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 600 && !mapReady) buildDesktopMap();
+});
+</script>
+</body>
+</html>
