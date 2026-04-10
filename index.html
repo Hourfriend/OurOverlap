@@ -1370,10 +1370,11 @@ function openNode(n) {
     if (el.classList.contains('p-label')) el.classList.add('dimmed');
   });
 
-  if (visited.size === NODES.length) setTimeout(triggerEnding, 600);
+  if (visited.size === NODES.length) panel.dataset.allVisited = 'true';
 }
 
 function closePanel() {
+  const allDone = panel.dataset.allVisited === 'true';
   panel.classList.remove('open', 'has-video');
   document.body.style.overflow = '';
   filmWrap.querySelectorAll('video').forEach(v => { v.pause(); v.src = ''; });
@@ -1385,6 +1386,7 @@ function closePanel() {
     const lbl = document.querySelector(`.p-label[data-id="${el.dataset.id}"]`);
     if (lbl) lbl.classList.remove('lit');
   });
+  if (allDone) setTimeout(triggerEnding, 500);
 }
 
 document.getElementById('panel-close').addEventListener('click', closePanel);
