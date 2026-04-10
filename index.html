@@ -264,7 +264,6 @@
     #panel-film video {
       width: 100%; height: 100%;
       object-fit: cover;
-      filter: blur(5px) brightness(.18) sepia(.4);
       transform: scale(1.1);
     }
     #panel-film.active { display: block; }
@@ -567,7 +566,7 @@
     #panel-imgbg img {
       width: 100%; height: 100%;
       object-fit: cover;
-      filter: blur(3px) brightness(0.22) saturate(0.7);
+      filter: brightness(0.45) saturate(0.85);
       transform: scale(1.06);
     }
 
@@ -646,14 +645,14 @@
 <div id="ending">
   <p class="end-line">I believe this is a once-in-a-lifetime connection.</p>
   <p class="end-line">That's all.</p>
-  <button id="btn-listen">Listen</button>
+  <button id="btn-listen">please listen</button>
 </div>
 
 <!-- ══════════ LISTEN ══════════ -->
 <div id="scene-listen">
   <p class="listen-head">Something to hold<br>while you sit with this.</p>
   <div class="player-wrap">
-    <p class="track-lbl" id="track-lbl">add your song</p>
+    <p class="track-lbl" id="track-lbl">final message</p>
     <div class="wavefield still" id="wavefield"></div>
     <div class="player-ctrls">
       <button class="p-btn" id="btn-mute">♪</button>
@@ -665,19 +664,20 @@
       <input type="range" class="vol-range" id="vol" min="0" max="1" step="0.01" value="0.8"/>
     </div>
     <audio id="audio" loop>
-      <source src="YOUR_SONG.mp3" type="audio/mpeg"/>
+      <source src="final_message.wav" type="audio/wav"/>
     </audio>
-    <p class="embed-note">
-      Replace <code>YOUR_SONG.mp3</code> with your audio file<br>
-      in the same folder as this page.
-    </p>
   </div>
   <button id="scene-back">← return</button>
 </div>
 
+<!-- ══════════ AMBIENT AUDIO ══════════ -->
+<audio id="ambient-audio" loop>
+  <source src="The_Border.mp3" type="audio/mpeg"/>
+</audio>
+
 <!-- ══════════ AMBIENT BAR ══════════ -->
 <div id="hint-bar">
-  <p>ambient sound</p>
+  <p>♪ the border — playing</p>
   <div class="hint-btns">
     <button class="h-btn" id="h-stop">stop</button>
     <button class="h-btn" id="h-mute">mute</button>
@@ -1032,10 +1032,27 @@ function openNode(n) {
   if (n.videoSrc) {
     filmWrap.classList.add('active');
     const vid = document.createElement('video');
-    vid.src = n.videoSrc;
-    vid.autoplay = true; vid.muted = true;
-    vid.loop = true; vid.playsInline = true;
+    vid.setAttribute('src', n.videoSrc);
+    vid.setAttribute('autoplay', '');
+    vid.setAttribute('muted', '');
+    vid.setAttribute('loop', '');
+    vid.setAttribute('playsinline', '');
+    vid.muted = true;
+    vid.loop  = true;
+
+    // Per-node blur level
+    const blurPx = n.id === 'shambhala' ? '2.4px'
+                 : n.id === 'intimacy'  ? '5px'
+                 : '8px';
+    vid.style.cssText = `
+      width:100%; height:100%; object-fit:cover;
+      filter: blur(${blurPx}) brightness(.22) sepia(.3);
+      transform: scale(1.06);
+    `;
+
     filmWrap.appendChild(vid);
+    // Ensure looping: restart on end as fallback
+    vid.addEventListener('ended', () => { vid.currentTime = 0; vid.play().catch(()=>{}); });
     vid.play().catch(()=>{});
   } else if (n.vinylBg) {
     document.getElementById('panel-vinyl').classList.add('active');
@@ -1092,18 +1109,39 @@ function triggerEnding() {
 
 document.getElementById('btn-listen').addEventListener('click', () => {
   document.getElementById('ending').classList.remove('show');
+  // Stop ambient track gracefully
+  const amb = document.getElementById('ambient-audio');
+  amb.pause();
+  amb.currentTime = 0;
+  document.getElementById('hint-bar').classList.remove('show');
+
   setTimeout(() => {
     document.getElementById('scene-listen').classList.add('show');
     buildWaveform();
+    // Auto-play final message
+    const audio = document.getElementById('audio');
+    audio.volume = 0.85;
+    audio.play().catch(()=>{});
+    document.getElementById('btn-play').textContent = '❚❚';
+    document.getElementById('wavefield').classList.remove('still');
   }, 700);
 });
 
 document.getElementById('scene-back').addEventListener('click', () => {
   document.getElementById('scene-listen').classList.remove('show');
+  const audio = document.getElementById('audio');
+  audio.pause(); audio.currentTime = 0;
+  document.getElementById('btn-play').textContent = '▶';
+  document.getElementById('wavefield').classList.add('still');
+  // Resume ambient if going back
+  const amb = document.getElementById('ambient-audio');
+  amb.volume = 0.45;
+  amb.play().catch(()=>{});
+  document.getElementById('hint-bar').classList.add('show');
 });
 
 // ════════════════════════════════════════════════════════
-// AUDIO PLAYER
+// FINAL MESSAGE PLAYER
 // ════════════════════════════════════════════════════════
 let waveBuilt = false;
 function buildWaveform() {
@@ -1118,7 +1156,7 @@ function buildWaveform() {
   }
 }
 
-const audio = document.getElementById('audio');
+const audio   = document.getElementById('audio');
 const btnPlay = document.getElementById('btn-play');
 btnPlay.addEventListener('click', () => {
   if (audio.paused) {
@@ -1144,13 +1182,32 @@ document.getElementById('vol').addEventListener('input', e => {
 });
 
 // ════════════════════════════════════════════════════════
-// AMBIENT HINT BAR
+// AMBIENT — The Border (autoplay on first interaction)
 // ════════════════════════════════════════════════════════
-setTimeout(() => document.getElementById('hint-bar').classList.add('show'), 3400);
-document.getElementById('h-stop').addEventListener('click', () =>
-  document.getElementById('hint-bar').classList.remove('show'));
+const ambAudio = document.getElementById('ambient-audio');
+ambAudio.volume = 0.45;
+
+// Autoplay requires a user gesture — attempt on first any click/touch
+let ambStarted = false;
+function startAmbient() {
+  if (ambStarted) return;
+  ambStarted = true;
+  ambAudio.play().catch(()=>{});
+  setTimeout(() => document.getElementById('hint-bar').classList.add('show'), 1200);
+  document.removeEventListener('click',   startAmbient);
+  document.removeEventListener('touchend', startAmbient);
+}
+document.addEventListener('click',    startAmbient);
+document.addEventListener('touchend', startAmbient);
+
+// Hint bar controls
+document.getElementById('h-stop').addEventListener('click', () => {
+  ambAudio.pause(); ambAudio.currentTime = 0;
+  document.getElementById('hint-bar').classList.remove('show');
+});
 document.getElementById('h-mute').addEventListener('click', function() {
-  this.textContent = this.textContent === 'mute' ? 'unmute' : 'mute';
+  ambAudio.muted = !ambAudio.muted;
+  this.textContent = ambAudio.muted ? 'unmute' : 'mute';
 });
 
 // ════════════════════════════════════════════════════════
