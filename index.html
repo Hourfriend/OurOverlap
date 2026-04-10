@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Where We Overlapped</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet"/>
   <style>
@@ -589,6 +589,168 @@
       background: radial-gradient(ellipse 70% 65% at 50% 50%,
         rgba(6,4,3,.72) 0%, transparent 100%);
       z-index: -1; pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════
+       MOBILE OPTIMISATION
+    ═══════════════════════════════════════ */
+    @media (max-width: 600px) {
+
+      /* ── Hero ── */
+      #hero {
+        padding: 56px 24px 48px;
+        min-height: 100svh;
+        justify-content: center;
+      }
+      .souls-wrap { margin-bottom: 40px; }
+      .hero-h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
+      .hero-sub p { font-size: 1.08rem; line-height: 1.95; }
+      .hero-arrow { margin-top: 44px; }
+
+      /* ── Map section ── */
+      #map-section { padding: 40px 0 60px; }
+      .map-hint { font-size: 12px; margin-bottom: 32px; padding: 0 24px; }
+
+      /* ── Mobile list rows — larger tap targets ── */
+      .mob-row {
+        padding: 20px 4px;
+        gap: 16px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mob-glyph { font-size: 20px; width: 28px; text-align: center; }
+      .mob-name  { font-size: 17px; }
+
+      /* ── Leaf trail ── */
+      #leaf-row { padding: 0 24px; margin-top: 36px; }
+
+      /* ── Ending inline ── */
+      #ending-inline { padding: 52px 28px 80px; }
+      .end-line { font-size: clamp(1.1rem, 5.5vw, 1.4rem); }
+
+      /* ── Panel ── */
+      #panel { padding: 0; align-items: flex-end; }
+      #panel-inner {
+        width: 100%;
+        max-width: 100%;
+        max-height: 92svh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 18px 18px 0 0;
+        background: rgba(10,7,5,.96);
+        padding: 36px 28px 40px;
+        text-align: center;
+        /* account for notch/home indicator */
+        padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+      }
+      /* Reset the radial vignette pseudo on mobile — bg handled by panel-inner bg */
+      #panel-inner::before { display: none; }
+
+      .p-panel-glyph { font-size: 1.8rem; margin-bottom: 18px; }
+      #panel-title   { font-size: clamp(1.6rem, 7vw, 2.2rem); margin-bottom: 18px; }
+      #panel-text {
+        font-size: 1.08rem;
+        line-height: 1.88;
+        max-height: none; /* let panel-inner scroll instead */
+        overflow-y: visible;
+      }
+      #panel-close {
+        font-size: 15px;
+        padding: 14px 32px;
+        margin-top: 28px;
+        color: rgba(200,147,90,.5);
+        /* Sticky close bar at bottom feel */
+        display: block;
+        width: 100%;
+        text-align: center;
+        border-top: 1px solid rgba(200,147,90,.08);
+        padding-top: 20px;
+        margin-top: 24px;
+      }
+
+      /* Video/image/vinyl backgrounds — full panel on mobile */
+      #panel-film, #panel-vinyl, #panel-imgbg {
+        border-radius: 18px 18px 0 0;
+      }
+
+      /* ── Listen scene ── */
+      #scene-listen {
+        padding: 48px 28px max(48px, env(safe-area-inset-bottom, 48px));
+        justify-content: flex-start;
+        padding-top: 72px;
+        overflow-y: auto;
+      }
+      .listen-head {
+        font-size: clamp(1.1rem, 5vw, 1.5rem);
+        margin-bottom: 36px;
+      }
+      .player-wrap { max-width: 100%; }
+      .wavefield   { height: 42px; margin-bottom: 28px; }
+
+      /* Bigger touch targets for audio controls */
+      .p-btn      { width: 52px; height: 52px; font-size: 15px; }
+      .p-btn.main { width: 64px; height: 64px; font-size: 20px; }
+      .player-ctrls { gap: 20px; margin-bottom: 28px; }
+
+      /* Wider, easier-to-touch volume slider */
+      input[type=range].vol-range { width: 160px; height: 4px; }
+      input[type=range].vol-range::-webkit-slider-thumb {
+        width: 20px; height: 20px;
+      }
+
+      #scene-back {
+        font-size: 15px;
+        margin-top: 36px;
+        padding: 12px 24px;
+        /* visible tap target */
+        border: 1px solid rgba(200,147,90,.1);
+        border-radius: 2px;
+      }
+
+      /* ── Hint bar — respect home indicator ── */
+      #hint-bar {
+        padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
+      }
+      #hint-bar p { font-size: 12px; }
+      .h-btn {
+        font-size: 12px;
+        padding: 8px 12px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* ── Vinyl disc — smaller on phone ── */
+      .vinyl-disc {
+        width: min(320px, 85vw);
+        height: min(320px, 85vw);
+      }
+    }
+
+    /* Extra-small phones (SE, Galaxy A series) */
+    @media (max-width: 380px) {
+      .hero-h1 { font-size: 2.2rem; }
+      #panel-inner { padding: 28px 20px 36px; }
+      .p-btn      { width: 46px; height: 46px; }
+      .p-btn.main { width: 58px; height: 58px; }
+    }
+
+    /* ── Touch devices: disable lingering hover states ── */
+    @media (hover: none) {
+      .mob-row:hover       { background: transparent; }
+      .mob-row:hover .mob-name { color: var(--cream-dim); }
+      #panel-close:hover   { color: rgba(200,147,90,.5); }
+      #btn-listen:hover    { color: var(--amber); border-color: rgba(200,147,90,.22); }
+      .p-btn:hover         { border-color: rgba(200,147,90,.18); color: rgba(239,229,212,.42); }
+      .p-btn.main:hover    { border-color: rgba(200,147,90,.28); color: var(--amber); }
+      #scene-back:hover    { color: rgba(200,147,90,.25); }
+      .h-btn:hover         { color: rgba(200,147,90,.22); }
+    }
+
+    /* Active (press) states for touch feedback */
+    @media (hover: none) {
+      .mob-row:active       { background: rgba(200,147,90,.06) !important; }
+      #panel-close:active   { color: var(--amber) !important; }
+      #btn-listen:active    { color: var(--amber-light) !important; }
+      .p-btn:active         { border-color: rgba(200,147,90,.5) !important; color: var(--amber) !important; }
+      #scene-back:active    { color: var(--amber) !important; }
     }
   </style>
 </head>
