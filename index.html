@@ -956,7 +956,7 @@
 </div>
 
 <!-- ══════════ AMBIENT AUDIO ══════════ -->
-<audio id="ambient-audio" loop>
+<audio id="ambient-audio">
   <source src="The_Border.mp3" type="audio/mpeg"/>
 </audio>
 
@@ -1522,19 +1522,36 @@ document.getElementById('vol').addEventListener('input', e => {
 });
 
 // ════════════════════════════════════════════════════════
-// AMBIENT — The Border (autoplay on first interaction)
+// AMBIENT — Playlist (The Border → Stonecutters → loops)
 // ════════════════════════════════════════════════════════
+const AMB_PLAYLIST = [
+  'The_Border.mp3',
+  'DOPE_LEMON_-_Stonecutters.mp3'
+];
+let ambTrackIndex = 0;
 const ambAudio = document.getElementById('ambient-audio');
 ambAudio.volume = 0.45;
 
-// Autoplay requires a user gesture — attempt on first any click/touch
+function loadAmbTrack(index) {
+  ambTrackIndex = index % AMB_PLAYLIST.length;
+  ambAudio.src = AMB_PLAYLIST[ambTrackIndex];
+  ambAudio.load();
+  ambAudio.play().catch(()=>{});
+}
+
+// Auto-advance to next track when current ends
+ambAudio.addEventListener('ended', () => {
+  loadAmbTrack(ambTrackIndex + 1);
+});
+
+// Autoplay on first user interaction
 let ambStarted = false;
 function startAmbient() {
   if (ambStarted) return;
   ambStarted = true;
   ambAudio.play().catch(()=>{});
   setTimeout(() => document.getElementById('hint-bar').classList.add('show'), 1200);
-  document.removeEventListener('click',   startAmbient);
+  document.removeEventListener('click',    startAmbient);
   document.removeEventListener('touchend', startAmbient);
 }
 document.addEventListener('click',    startAmbient);
