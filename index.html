@@ -696,20 +696,23 @@
       #ending-inline { padding: 52px 28px 80px; }
       .end-line { font-size: clamp(1.1rem, 5.5vw, 1.4rem); }
 
-      /* ── Panel ── */
-      #panel { padding: 0; align-items: flex-end; }
+      /* ── Panel — full screen on mobile ── */
+      #panel { padding: 0; align-items: stretch; }
       #panel-inner {
         width: 100%;
         max-width: 100%;
-        max-height: 92svh;
+        height: 100svh;
+        max-height: 100svh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        border-radius: 18px 18px 0 0;
-        background: rgba(10,7,5,.96);
-        padding: 36px 28px 40px;
+        border-radius: 0;
+        background: rgba(10,7,5,.97);
+        padding: 52px 28px 40px;
         text-align: center;
-        /* account for notch/home indicator */
         padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
       /* Reset the radial vignette pseudo on mobile — bg handled by panel-inner bg */
       #panel-inner::before { display: none; }
@@ -736,9 +739,9 @@
         margin-top: 24px;
       }
 
-      /* Video/image/vinyl backgrounds — full panel on mobile */
+      /* Video/image/vinyl backgrounds — full screen on mobile */
       #panel-film, #panel-vinyl, #panel-imgbg {
-        border-radius: 18px 18px 0 0;
+        border-radius: 0;
       }
 
       /* ── Listen scene ── */
